@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EV Charging Stations</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        /* Set the size of the map */
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        /* Style the label and dropdown */
+        label, select {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        /* Style the button */
+        button {
+            font-size: 1.2em;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        /* Style the input field */
+        input[type="number"] {
+            font-size: 1.2em;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            width: 100px;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Create a map container -->
+    <div id="map"></div>
+    <br>
+    <!-- Add filter by type dropdown -->
+    <label for="station-type">Filter by type:</label>
+    <select id="station-type">
+        <option value="all">All</option>
+        <option value="CCS/ChADEMO/ Type 2 AC">CCS/ChADEMO/ Type 2 AC</option>
+        <option value="DC-001">DC-001</option>
+        <option value="AC-001">AC-001</option>
+    </select>
+    <br>
+    <!-- Add filter by radius form -->
+    <form id="radius-form">
+        <label for="radius-input">Filter by radius:</label>
+        <input type="number" id="radius-input" name="radius-input" value="1" min="1" max="50">
+        <label for="radius-unit">kilometers</label>
+        <button type="submit">Apply</button>
+    </form>
+    <button onclick="centerToUserLocation()">My Location</button>
+    <script>
+        let map;
+
+        function initMap() {
+            // Create a map object
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 12,
+            });
+
+            // Get the user's location and set the center of the map
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+                        map.setCenter(userLocation);
+                    },
+                    () => {
+                        // Handle error
+                    }
+                );
+            } else {
+                // Geolocation is not supported by the browser
+            }
+
+            // Create an array to store the location data of all charging stations
+            const stationLocations = [];
+
+            // Create a marker for each charging station
+            const stations = {
+                "1": {
+                    "no": "1",
+                    "region": "NDMC",
+                    "address": "Pragati Maidan",
+                    "lat": 28.6128,
+                    "lng": 77.2290
+                },
+                "2": {
+                    "no": "2",
+                    "region": "NDMC",
+                    "address": "Lodhi Road",
+                    "lat": 28.5906,
+                    "lat": 28.5906,
+                "lng": 77.2278
+            },
+            "3": {
+                "no": "3",
+                "region": "SDMC",
+                "address": "Nehru Place",
+                "lat": 28.5475,
+                "lng": 77.2541
+            }
+        };
+
+        // Add each marker to the map and the stationLocations array
+        for (const station in stations) {
+            const marker = new google.maps.Marker({
+                position: { lat: stations[station].lat, lng: stations[station].lng },
+                map,
+                title: `Charging Station No. ${stations[station].no}`,
+            });
+
+            stationLocations.push({
+                region: stations[station].region,
+                address: stations[station].address,
+                lat: stations[station].lat,
+                lng: stations[station].lng,
+                marker: marker
+            });
+        }
+
+        // Add a click event listener to each marker to display the station info
+        for (const stationLocation of stationLocations) {
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div>
+                        <h2>${stationLocation.region}</h2>
+                        <p>${stationLocation.address}</p>
+                    </div>
+                `,
+            });
+
+            stationLocation.marker.addListener("click", () => {
+                infoWindow.open(map, stationLocation.marker);
+            });
+        }
+    }
+
+    function centerToUserLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+                    map.setCenter(userLocation);
+                },
+                () => {
+                    // Handle error
+                }
+            );
+        } else {
+            // Geolocation is not supported by the browser
+        }
+    }
+</script>
+<!-- Replace YOUR_API_KEY with your actual API key -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7zWaiMvfpajP2smUI2rvc3O0FMrfF4Mo&callback=initMap" async defer></script>
+
+
+</body>
+</html>
+
